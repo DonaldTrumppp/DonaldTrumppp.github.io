@@ -35,5 +35,18 @@ const utils = {
         if (direction === "right") {return "left"}
         if (direction === "up") {return "down"}
         return "up"
-    }
+    },
+
+    wait(ms){
+        return new Promise(resolve =>{
+            setTimeout(() =>{
+                resolve()
+            }, ms)
+        })
+    },
+
+    randomFromArray(array){
+        return array[Math.floor(Math.random()*array.length)];
+    },
+
 }

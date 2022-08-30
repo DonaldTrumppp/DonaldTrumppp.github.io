@@ -78,7 +78,7 @@ class Overworld {
   }
 
   init() {
-    this.startMap(window.OverworldMaps.DemoRoom);
+    this.startMap(window.OverworldMaps.Street);
 
     this.bindActionInput();
     this.bindHeroPositionCheck();
@@ -91,6 +91,7 @@ class Overworld {
     this.startAnimating();
 
     this.map.startCutscene([
+      {type: "battle"}
       // {type: "changeMap", map: "DemoRoom"}
       // {who: "hero", type: "walk", direction: "down"},
       // {who: "hero", type: "walk", direction: "down"},

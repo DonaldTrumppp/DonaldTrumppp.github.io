@@ -1,10 +1,10 @@
-class OverworldEvent{
-    constructor({map, event}){
+class OverworldEvent {
+    constructor({ map, event }) {
         this.map = map;
         this.event = event;
     }
 
-    stand(resolve){
+    stand(resolve) {
         const who = this.map.gameObjects[this.event.who]
         who.startBehavior({
             map: this.map,
@@ -16,7 +16,7 @@ class OverworldEvent{
 
         // Set up a handler to complete when correct person is done walking, then resolve the event
         const completeHandler = e => {
-            if (e.detail.whoId === this.event.who){
+            if (e.detail.whoId === this.event.who) {
                 document.removeEventListener("PersonStandingComplete", completeHandler);
                 resolve();
             }
@@ -25,7 +25,7 @@ class OverworldEvent{
         document.addEventListener("PersonStandingComplete", completeHandler)
     }
 
-    walk(resolve){
+    walk(resolve) {
         const who = this.map.gameObjects[this.event.who]
         who.startBehavior({
             map: this.map,
@@ -37,7 +37,7 @@ class OverworldEvent{
 
         // Set up a handler to complete when correct person is done walking, then resolve the event
         const completeHandler = e => {
-            if (e.detail.whoId === this.event.who){
+            if (e.detail.whoId === this.event.who) {
                 document.removeEventListener("PersonWalkingComplete", completeHandler);
                 resolve();
             }
@@ -46,12 +46,12 @@ class OverworldEvent{
         document.addEventListener("PersonWalkingComplete", completeHandler)
     }
 
-    textMessage(resolve){
+    textMessage(resolve) {
 
 
-        if (this.event.faceHero){
+        if (this.event.faceHero) {
             const obj = this.map.gameObjects[this.event.faceHero];
-            obj.direction = utils.oppositeDirection(this.map.gameObjects["hero"].direction );
+            obj.direction = utils.oppositeDirection(this.map.gameObjects["hero"].direction);
         }
 
         const message = new TextMessage({
@@ -61,19 +61,27 @@ class OverworldEvent{
         message.init(document.querySelector(".game-container"))
     }
 
-    changeMap(resolve){
+    changeMap(resolve) {
         const sceneTransition = new SceneTransition();
-        sceneTransition.init(document.querySelector(".game-container"), ()=>{
+        sceneTransition.init(document.querySelector(".game-container"), () => {
             this.map.overworld.startMap(window.OverworldMaps[this.event.map]);
             resolve();
 
             sceneTransition.fadeOut();
         });
 
-        
+
     }
 
-    init(){
+    battle(resolve) {
+        const battle = new Battle({
+            onComplete: () => { resolve(); },
+        });
+        battle.init(document.querySelector(".game-container"))
+
+    }
+
+    init() {
         return new Promise(resolve => {
             this[this.event.type](resolve)
         })

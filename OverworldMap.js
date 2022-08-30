@@ -1,9 +1,11 @@
 class OverworldMap {
     constructor(config){
         this.overworld = null;
-        this.gameObjects = config.gameObjects;
+        this.gameObjects = []; // Live object
         this.walls = config.walls || {};
         this.cutsceneSpaces = config.cutsceneSpaces || {};
+
+        this.configObjects = config.configObjects; // Configuration
 
         // Lower = Background
         this.lowerImage = new Image();
@@ -28,13 +30,24 @@ class OverworldMap {
     }
 
     mountObjects(){
-        Object.keys(this.gameObjects).forEach(key =>{
-            let o = this.gameObjects[key];
-            o.id = key;
+        Object.keys(this.configObjects).forEach(key =>{
+            let object = this.configObjects[key];
+            object.id = key;
 
+            let instance;
+            if (object.type === "Person"){
+                instance = new Person(object);
+            }
+            if (object.type === "PizzaStone"){
+                console.log("pizzastone")
+                // instance = new PizzaStone(object);
+            }
+            this.gameObjects[key] = instance;
+            this.gameObjects[key].id = key;
+            instance.mount(this);
             //determine whether the object should be mounted (e.g. key or gold chest)
 
-            o.mount(this);
+            
         })
     }
 
@@ -82,20 +95,22 @@ class OverworldMap {
 
 window.OverworldMaps = {
     DemoRoom: {
-        lowerSrc: "/images/maps/DemoLower.png",
-        upperSrc: "/images/maps/DemoUpper.png",
-        gameObjects: {
-            hero: new Person({
+        lowerSrc: "./images/maps/DemoLower.png",
+        upperSrc: "./images/maps/DemoUpper.png",
+        configObjects: {
+            hero: {
+                type: "Person",
                 isplayerControlled: true,
                 x: utils.withGrid(5),
                 y: utils.withGrid(6),
                 tileSize : 48,
                 offset : {x: 16, y: 20},
-            }),
-            npcA: new Person({
+            },
+            npcA: {
+                type: "Person",
                 x: utils.withGrid(7),
                 y: utils.withGrid(9),
-                src: "/images/characters/people/npc1.png",
+                src: "./images/characters/people/npc1.png",
                 behaviorLoop:[
                     {type: "stand", direction: "left", time: 800},
                     {type: "stand", direction: "up", time: 800},
@@ -111,11 +126,12 @@ window.OverworldMaps = {
                         ]
                     }
                 ],
-            }),
-            npcB: new Person({
+            },
+            npcB: {
+                type: "Person",
                 x: utils.withGrid(3),
                 y: utils.withGrid(7),
-                src: "/images/characters/people/npc2.png",
+                src: "./images/characters/people/npc2.png",
                 behaviorLoop: [
                     {type: "walk", direction: "left"},
                     {type: "stand", direction: "up", time: 800},
@@ -123,7 +139,7 @@ window.OverworldMaps = {
                     {type: "walk", direction: "right"},
                     {type: "walk", direction: "down"},
                 ],
-            }),
+            },
         },
         walls: {
             // [dynamic key]
@@ -154,20 +170,22 @@ window.OverworldMaps = {
         }
     },
     Kitchen: {
-        lowerSrc: "/images/maps/KitchenLower.png",
-        upperSrc: "/images/maps/KitchenUpper.png",
-        gameObjects: {
-            hero: new Person({
+        lowerSrc: "./images/maps/KitchenLower.png",
+        upperSrc: "./images/maps/KitchenUpper.png",
+        configObjects: {
+            hero: {
+                type: "Person",
                 isplayerControlled: true,
                 x: utils.withGrid(5),
                 y: utils.withGrid(5),
                 tileSize : 48,
                 offset : {x: 16, y: 20},
-            }),
-            npcA: new Person({
+            },
+            npcA: {
+                type: "Person",
                 x: utils.withGrid(9),
                 y: utils.withGrid(6),
-                src: "/images/characters/people/npc1.png",
+                src: "./images/characters/people/npc1.png",
                 talking:[
                     {
                         events: [ 
@@ -177,12 +195,143 @@ window.OverworldMaps = {
                         ]
                     }
                 ],
-            }),
-            npcB: new Person({
+            },
+            npcB: {
+                type: "Person",
                 x: utils.withGrid(10),
                 y: utils.withGrid(8),
-                src: "/images/characters/people/npc2.png",
-            }),
+                src: "./images/characters/people/npc2.png",
+            },
         }
-    }
+    },
+    Street: {
+        id: "Street",
+        lowerSrc: "./images/maps/StreetLower.png",
+        upperSrc: "./images/maps/StreetUpper.png",
+        configObjects: {
+          hero: {
+            type: "Person",
+            isPlayerControlled: true,
+            x: utils.withGrid(30),
+            y: utils.withGrid(10),
+            tileSize : 48,
+            offset : {x: 16, y: 20},
+          },
+          streetNpcA: {
+            type: "Person",
+            x: utils.withGrid(9),
+            y: utils.withGrid(11),
+            src: "./images/characters/people/npc2.png",
+            behaviorLoop: [
+              { type: "stand", direction: "right", time: 1400, },
+              { type: "stand", direction: "up", time: 900, },
+            ],
+            talking: [
+              {
+                events: [
+                  { type: "textMessage", text: "All ambitious pizza chefs gather on Anchovy Avenue.", faceHero: "streetNpcA" },
+                ]
+              }
+            ]
+          },
+          streetNpcB: {
+            type: "Person",
+            x: utils.withGrid(31),
+            y: utils.withGrid(12),
+            src: "./images/characters/people/npc7.png",
+            behaviorLoop: [
+              { type: "stand", direction: "up", time: 400, },
+              { type: "stand", direction: "left", time: 800, },
+              { type: "stand", direction: "down", time: 400, },
+              { type: "stand", direction: "left", time: 800, },
+              { type: "stand", direction: "right", time: 800, },
+            ],
+            talking: [
+              {
+                events: [
+                  { type: "textMessage", text: "I can't decide on my favorite toppings.", faceHero: "streetNpcB" },
+                ]
+              }
+            ]
+          },
+          streetNpcC: {
+            type: "Person",
+            x: utils.withGrid(22),
+            y: utils.withGrid(10),
+            src: "./images/characters/people/npc8.png",
+            talking: [
+              {
+                required: ["streetBattle"],
+                events: [
+                  { type: "textMessage", text: "You are quite capable.", faceHero: "streetNpcC" },
+                ]
+              },
+              {
+                events: [
+                  { type: "textMessage", text: "You should have just stayed home!", faceHero: "streetNpcC" },
+                  { type: "battle", enemyId: "streetBattle" },
+                  { type: "addStoryFlag", flag: "streetBattle"},
+                ]
+              },
+            ]
+          },
+        },
+        walls: function() {
+          let walls = {};
+          ["4,9", "5,8", "6,9", "7,9", "8,9", "9,9", "10,9", "11,9", "12,9", "13,8", "14,8", "15,7",
+            "16,7", "17,7", "18,7", "19,7", "20,7", "21,7", "22,7", "23,7", "24,7", "24,6", "24,5", "26,5", "26,6", "26,7", "27,7", "28,8", "28,9", "29,8", "30,9", "31,9", "32,9", "33,9",
+            "16,9", "17,9", "25,9", "26,9", "16,10", "17,10", "25,10", "26,10", "16,11", "17,11", "25,11", "26,11",
+            "18,11","19,11",
+            "4,14", "5,14", "6,14", "7,14", "8,14", "9,14", "10,14", "11,14", "12,14", "13,14", "14,14", "15,14", "16,14", "17,14", "18,14", "19,14", "20,14", "21,14", "22,14", "23,14",
+            "24,14", "25,14", "26,14", "27,14", "28,14", "29,14", "30,14", "31,14", "32,14", "33,14",
+            "3,10", "3,11", "3,12", "3,13", "34,10", "34,11", "34,12", "34,13",
+              "29,8","25,4",
+          ].forEach(coord => {
+            let [x,y] = coord.split(",");
+            walls[utils.asGridCoord(x,y)] = true;
+          })
+          return walls;
+        }(),
+        cutsceneSpaces: {
+          [utils.asGridCoord(5,9)]: [
+            {
+              events: [
+                { 
+                  type: "changeMap",
+                  map: "DiningRoom",
+                  x: utils.withGrid(6),
+                  y: utils.withGrid(12),
+                  direction: "up"
+                }
+              ]
+            }
+          ],
+          [utils.asGridCoord(29,9)]: [
+            {
+              events: [
+                {
+                  type: "changeMap",
+                  map: "Shop",
+                  x: utils.withGrid(5),
+                  y: utils.withGrid(12),
+                  direction: "up"
+                }
+              ]
+            }
+          ],
+          [utils.asGridCoord(25,5)]: [
+            {
+              events: [
+                {
+                  type: "changeMap",
+                  map: "StreetNorth",
+                  x: utils.withGrid(7),
+                  y: utils.withGrid(16),
+                  direction: "up"
+                }
+              ]
+            }
+          ]
+        }
+      },
 }
