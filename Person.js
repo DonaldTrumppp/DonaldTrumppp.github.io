@@ -3,8 +3,9 @@ class Person extends GameObject {
         super(config);
         this.movingProgressRemaining = 0;
         this.isStanding = false;
+        this.intentPosition = null;
 
-        this.isplayerControlled = config.isplayerControlled || false;
+        this.isPlayerControlled = config.isPlayerControlled || false;
 
         this.directionUpdate = {
             "up": ["y", -1],
@@ -22,11 +23,13 @@ class Person extends GameObject {
 
             // more cases such as not keyboard ready
 
+            
             // no cutscene playing && keyboard ready && have a arrow pressed
-            if (!state.map.isCutscenePlaying && this.isplayerControlled && state.arrow) {
+            if (!state.map.isCutscenePlaying && this.isPlayerControlled && state.arrow) {
                 this.startBehavior(state, {
                     type: "walk",
                     direction: state.arrow,
+                    
                     
                 })
                 
@@ -37,6 +40,11 @@ class Person extends GameObject {
     }
 
     startBehavior(state, behavior) {
+
+        if (!this.isMounted){
+            return;
+        }
+
         // Set character direction to behavior
         this.direction = behavior.direction;
         if (behavior.type === "walk") {
@@ -51,6 +59,11 @@ class Person extends GameObject {
             }
 
             this.movingProgressRemaining = 16;
+            const intentPosition = utils.nextPosition(this.x,this.y,this.direction)
+            this.intentPosition = [
+                intentPosition.x,
+                intentPosition.y
+            ]
             this.updateSprite();
         }
 
@@ -72,6 +85,7 @@ class Person extends GameObject {
 
         if (this.movingProgressRemaining == 0){
             // walking completed
+            this.intentPosition = null;
             utils.emitEvent("PersonWalkingComplete", {
                 whoId: this.id,
             })

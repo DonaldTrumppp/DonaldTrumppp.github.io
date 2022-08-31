@@ -62,9 +62,17 @@ class OverworldEvent {
     }
 
     changeMap(resolve) {
+
+        Object.values(this.map.gameObjects).forEach(obj =>{
+            obj.isMounted = false;
+        })
         const sceneTransition = new SceneTransition();
         sceneTransition.init(document.querySelector(".game-container"), () => {
-            this.map.overworld.startMap(window.OverworldMaps[this.event.map]);
+            this.map.overworld.startMap(window.OverworldMaps[this.event.map], {
+                x: this.event.x,
+                y: this.event.y,
+                direction:this.event.direction,
+            });
             resolve();
 
             sceneTransition.fadeOut();
@@ -75,10 +83,41 @@ class OverworldEvent {
 
     battle(resolve) {
         const battle = new Battle({
-            onComplete: () => { resolve(); },
+            enemy: Enemies[this.event.enemyId],
+            onComplete: (didwin) => { 
+                resolve(didwin? "WON_BATTLE" : "LOST_BATTLE"); 
+            },
         });
         battle.init(document.querySelector(".game-container"))
 
+    }
+
+    pause(resolve){
+        this.map.isPaused = true;
+        const menu = new PauseMenu({
+            progress: this.map.overworld.progress,
+            onComplete: ()=>{
+                resolve();
+                this.map.isPaused = false;
+                // this.map.overworld.startGameLoop();
+            }
+        });
+        menu.init(document.querySelector(".game-container"));
+    }
+
+    addStoryFlag(resolve){
+        window.playerState.storyFlags[this.event.flag] = true;
+        resolve();
+    }
+
+    craftingMenu(resolve){
+        const menu = new CraftingMenu({
+            pizzas: this.event.pizzas,
+            onComplete: () =>{
+                resolve();
+            }
+        })
+        menu.init(document.querySelector(".game-container"));
     }
 
     init() {

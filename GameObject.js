@@ -15,6 +15,7 @@ class GameObject{
         this.behaviorLoopIndex = 0;
 
         this.talking = config.talking || [];
+        this.retryTimeout = null;
     }
 
     mount(map){
@@ -29,8 +30,20 @@ class GameObject{
     async doBehaviorEvent(map){
 
         // Don't start idle behavior if cutscene playing or no config || isStanding (avoid stacking async timeout)
-        if (map.isCutscenePlaying || this.behaviorLoop[this.behaviorLoopIndex] === undefined 
+        if (this.behaviorLoop[this.behaviorLoopIndex] === undefined 
             || this.behaviorLoop.length === 0 || this.isStanding){
+            return;
+        }
+
+        if (map.isCutscenePlaying){
+
+            if(this.retryTimeout){
+                clearTimeout(this.retryTimeout);
+            }
+
+            this.retryTimeout = setTimeout(() =>{
+                this.doBehaviorEvent(map);
+            }, 1000)
             return;
         }
 
